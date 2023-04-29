@@ -4,3 +4,4 @@ lib/libmalloc*.so
 test.log
 *.o
 *.swp
+.vscode/
