@@ -69,8 +69,6 @@ void free(void *ptr) {
     block->size = 0;
     free_list_insert(block);
     block_release(FreeList.prev);
-
-    // print_free_list();
 }
 
 /**
@@ -82,8 +80,19 @@ void free(void *ptr) {
  **/
 void *calloc(size_t nmemb, size_t size) {
     // TODO: Implement calloc
-    // Counters[CALLOCS]++;
-    return NULL;
+    if (!nmemb || nmemb * size / nmemb != size)
+        return NULL;
+    Block * block = malloc(nmemb * size);
+
+    if (block)
+    {
+        memset(block->data, 0, block->capacity);
+        Counters[CALLOCS]++;
+
+        return block->data;
+    }
+    else
+        return NULL;
 }
 
 /**
@@ -94,8 +103,33 @@ void *calloc(size_t nmemb, size_t size) {
  **/
 void *realloc(void *ptr, size_t size) {
     // TODO: Implement realloc
-    // Counters[REALLOCS]++;
-    return NULL;
+    if (!ptr)
+    {
+        Counters[REALLOCS]++;
+        return malloc(size);
+    }
+    else
+    {
+        Block *block = (Block *)ptr - 1;
+        void * new_ptr;
+        if (block->capacity >= size)
+        {
+            block_split(block, size);
+            new_ptr = block->data;
+        }
+        else
+        {
+            void * old_ptr = ptr;
+            size_t old_sz = block->size;
+            free(old_ptr);
+            new_ptr = malloc(size);
+
+            memmove(new_ptr, old_ptr, old_sz);
+        }
+
+        Counters[REALLOCS]++;
+        return new_ptr;
+    }    
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

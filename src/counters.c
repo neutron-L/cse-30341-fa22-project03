@@ -43,8 +43,7 @@ void init_counters() {
  **/
 double  internal_fragmentation() {
     // TODO: Implement internal fragmentation computation
-    
-        return 0.0;
+    return 0.0;
 }
 
 /**
