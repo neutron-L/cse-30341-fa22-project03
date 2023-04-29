@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <string.h>
 
+extern Block FreeList;
+
 /**
  * Allocate specified amount memory.
  * @param   size    Amount of bytes to allocate.
@@ -25,8 +27,8 @@ void *malloc(size_t size) {
 
     if (block)
     {
+        block_split(block, size);
         block_detach(block);
-        block_split(block, ALIGN(size));
     }
     else
         block = block_allocate(size);
@@ -63,6 +65,12 @@ void free(void *ptr) {
     Counters[FREES]++;
 
     // TODO: Try to release block, otherwise insert it into the free list
+    Block * block = (Block *)ptr - 1;
+    block->size = 0;
+    free_list_insert(block);
+    block_release(FreeList.prev);
+
+    // print_free_list();
 }
 
 /**

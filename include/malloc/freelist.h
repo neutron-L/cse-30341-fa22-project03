@@ -10,6 +10,7 @@
 Block *	free_list_search(size_t size);
 void	free_list_insert(Block *block);
 size_t  free_list_length();
+void    print_free_list();
 
 #endif
 

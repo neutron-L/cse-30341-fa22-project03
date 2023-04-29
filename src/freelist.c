@@ -160,4 +160,16 @@ size_t free_list_length()
     return len;
 }
 
+void  print_free_list()
+{
+    Block *cur = FreeList.next;
+
+    while (cur != &FreeList)
+    {
+        printf("%p: %d ", cur + sizeof(Block), cur->capacity);
+        cur = cur->next;
+    }
+    printf("\n");
+}
+
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */
