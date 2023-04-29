@@ -82,11 +82,12 @@ void *calloc(size_t nmemb, size_t size) {
     // TODO: Implement calloc
     if (!nmemb || nmemb * size / nmemb != size)
         return NULL;
-    Block * block = malloc(nmemb * size);
+    void * ptr = malloc(nmemb * size);
 
-    if (block)
+    if (ptr)
     {
-        memset(block->data, 0, block->capacity);
+        Block * block = (Block *)ptr - 1;
+        memset(ptr, 0, block->capacity);
         Counters[CALLOCS]++;
 
         return block->data;
