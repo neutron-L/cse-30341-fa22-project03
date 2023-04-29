@@ -13,7 +13,7 @@
  *
  *  1. Determined aligned amount of memory to allocate.
  *  2. Allocate memory on the heap.
- *  3. Set allocage block properties.
+ *  3. Set allocate block properties.
  *
  * @param   size    Number of bytes to allocate.
  * @return  Pointer to data portion of newly allocate block.
@@ -21,34 +21,21 @@
 Block *	block_allocate(size_t size) {
     // Allocate block
     intptr_t allocated = sizeof(Block) + ALIGN(size);
-
-    Block * block = free_list_search(allocated);
-
-    if (block)
-    {
-        block_detach(block);
-        // split
-        
-    }
-    else
-    {
-        block     = sbrk(allocated);
-        if (block == SBRK_FAILURE) {
-            return NULL;
-        }
-        block->capacity = ALIGN(size);
-        block->prev     = block;
-        block->next     = block;
+    Block *  block     = sbrk(allocated);
+    if (block == SBRK_FAILURE) {
+        return NULL;
     }
 
     // Record block information
+    block->capacity = ALIGN(size);
     block->size     = size;
-    
+    block->prev     = block;
+    block->next     = block;
+
     // Update counters
     Counters[HEAP_SIZE] += allocated;
     Counters[BLOCKS]++;
     Counters[GROWS]++;
-
     return block;
 }
 
@@ -62,11 +49,20 @@ Block *	block_allocate(size_t size) {
  * @return  Whether or not the release completed successfully.
  **/
 bool	block_release(Block *block) {
+    size_t allocated = sizeof(Block) + block->capacity;
+
     // TODO: Implement block release
-    // size_t allocated = 0;
-    // Counters[BLOCKS]--;
-    // Counters[SHRINKS]++;
-    // Counters[HEAP_SIZE] -= allocated;
+    if ((char *)block + allocated == sbrk(0) && block->capacity >= TRIM_THRESHOLD)
+    {
+        Counters[BLOCKS]--;
+        Counters[SHRINKS]++;
+        Counters[HEAP_SIZE] -= allocated;
+
+        sbrk(-allocated);
+
+        return true;
+    }
+    
     return false;
 }
 
@@ -78,6 +74,15 @@ bool	block_release(Block *block) {
  **/
 Block * block_detach(Block *block) {
     // TODO: Detach block from neighbors by updating previous and next block
+    if (block)
+    {
+        Block * prev = block->prev;
+        Block * next = block->next;
+        block->prev = block->next = block;
+        prev->next = next;
+        next->prev = prev;
+    }
+
     return block;
 }
 
@@ -97,8 +102,19 @@ Block * block_detach(Block *block) {
  **/
 bool	block_merge(Block *dst, Block *src) {
     // TODO: Implement block merge
-    // Counters[MERGES]++;
-    // Counters[BLOCKS]--;
+    if ((char*)dst + dst->capacity + sizeof(Block) == src)
+    {
+        dst->capacity += src->capacity + sizeof(Block);
+        
+        dst->next = src->next;
+        src->next->prev = dst;
+
+        Counters[MERGES]++;
+        Counters[BLOCKS]--;
+
+        return true;
+    }
+    
     return false;
 }
 
@@ -116,8 +132,24 @@ bool	block_merge(Block *dst, Block *src) {
  **/
 Block * block_split(Block *block, size_t size) {
     // TODO: Implement block split
-    // Counters[SPLITS]++;
-    // Counters[BLOCKS]++;
+    block->size = size;
+    size = ALIGN(size);
+    if (block->capacity - size > sizeof(Block))
+    {
+        Block * new_block = (char *)block + sizeof(Block) + size;
+        new_block->capacity = block->capacity - size - sizeof(Block);
+        new_block->size = 0;
+
+        new_block->next = block->next;
+        block->next->prev = new_block;
+        
+        block->next = new_block;
+        new_block->prev = block;
+
+        Counters[SPLITS]++;
+        Counters[BLOCKS]++;
+    }
+    
     return block;
 }
 

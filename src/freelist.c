@@ -136,6 +136,9 @@ void free_list_insert(Block *block)
 
     block->next = cur;
     cur->prev = block;
+
+    block_merge(block, block->next);
+    block_merge(block->prev, block);
 }
 
 /**
