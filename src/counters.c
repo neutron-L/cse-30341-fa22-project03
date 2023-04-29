@@ -43,7 +43,8 @@ void init_counters() {
  **/
 double  internal_fragmentation() {
     // TODO: Implement internal fragmentation computation
-    return 0;
+    
+        return 0.0;
 }
 
 /**
@@ -57,7 +58,18 @@ double  internal_fragmentation() {
  **/
 double  external_fragmentation() {
     // TODO: Implement external fragmentation computation
-    return 0;
+    Block *cur = FreeList.next;
+    size_t largest_free_block = 0;
+    size_t free_blocks = 0;
+
+    while (cur != &FreeList)
+    {
+        largest_free_block = MAX(cur->capacity, largest_free_block);
+        free_blocks +=  cur->capacity;
+        cur = cur->next;
+    }
+    
+    return free_blocks ? (1 - largest_free_block * 1.0 / free_blocks) * 100.0 : 0.00;
 }
 
 /**

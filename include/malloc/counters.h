@@ -16,6 +16,8 @@
 #define fdprintf(fd, b, s, ...) \
     sprintf(b, s, ##__VA_ARGS__); write(fd, b, strlen(b));
 
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 /* Counters */
 
 enum {
