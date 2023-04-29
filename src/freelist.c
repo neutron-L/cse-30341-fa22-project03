@@ -20,9 +20,15 @@ Block FreeList = {-1, -1, &FreeList, &FreeList};
  * @param   size    Amount of memory required.
  * @return  Pointer to existing block (otherwise NULL if none are available).
  **/
-Block * free_list_search_ff(size_t size) {
+Block *free_list_search_ff(size_t size)
+{
     // TODO: Implement first fit algorithm
-    return NULL;
+    Block *cur = FreeList.next;
+
+    while (cur != &FreeList && cur->capacity < size)
+        cur = cur->next;
+
+    return cur == &FreeList ? NULL : cur;
 }
 
 /**
@@ -31,9 +37,23 @@ Block * free_list_search_ff(size_t size) {
  * @param   size    Amount of memory required.
  * @return  Pointer to existing block (otherwise NULL if none are available).
  **/
-Block * free_list_search_bf(size_t size) {
+Block *free_list_search_bf(size_t size)
+{
     // TODO: Implement best fit algorithm
-    return NULL;
+    Block *cur = FreeList.next;
+    Block *target = NULL;
+
+    while (cur != &FreeList)
+    {
+        if (cur->capacity >= size)
+        {
+            if (target == NULL || cur->capacity < target->capacity)
+                target = cur;
+        }
+        cur = cur->next;
+    }
+
+    return target;
 }
 
 /**
@@ -42,9 +62,23 @@ Block * free_list_search_bf(size_t size) {
  * @param   size    Amount of memory required.
  * @return  Pointer to existing block (otherwise NULL if none are available).
  **/
-Block * free_list_search_wf(size_t size) {
+Block *free_list_search_wf(size_t size)
+{
     // TODO: Implement worst fit algorithm
-    return NULL;
+    Block *cur = FreeList.next;
+    Block *target = NULL;
+
+    while (cur != &FreeList)
+    {
+        if (cur->capacity >= size)
+        {
+            if (target == NULL || cur->capacity > target->capacity)
+                target = cur;
+        }
+        cur = cur->next;
+    }
+
+    return target;
 }
 
 /**
@@ -56,17 +90,19 @@ Block * free_list_search_wf(size_t size) {
  * @param   size    Amount of memory required.
  * @return  Pointer to existing block (otherwise NULL if none are available).
  **/
-Block * free_list_search(size_t size) {
-    Block * block = NULL;
-#if	defined FIT && FIT == 0
+Block *free_list_search(size_t size)
+{
+    Block *block = NULL;
+#if defined FIT && FIT == 0
     block = free_list_search_ff(size);
-#elif	defined FIT && FIT == 1
+#elif defined FIT && FIT == 1
     block = free_list_search_wf(size);
-#elif	defined FIT && FIT == 2
+#elif defined FIT && FIT == 2
     block = free_list_search_bf(size);
 #endif
 
-    if (block) {
+    if (block)
+    {
         Counters[REUSES]++;
     }
     return block;
@@ -86,17 +122,39 @@ Block * free_list_search(size_t size) {
  *
  * @param   block   Pointer to block to insert into free list.
  **/
-void	free_list_insert(Block *block) {
+void free_list_insert(Block *block)
+{
     // TODO: Implement free list insertion
+    Block *cur = FreeList.next;
+
+    while (cur != &FreeList && cur < block)
+        cur = cur->next;
+    
+    Block * prev = cur->prev;
+    block->prev = prev;
+    prev->next = block;
+
+    block->next = cur;
+    cur->prev = block;
 }
 
 /**
  * Return length of free list.
  * @return  Length of the free list.
  **/
-size_t  free_list_length() {
+size_t free_list_length()
+{
     // TODO: Implement free list length
-    return 0;
+    Block *cur = FreeList.next;
+    size_t len = 0;
+
+    while (cur != &FreeList)
+    {
+        ++len;
+        cur = cur->next;
+    }
+
+    return len;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

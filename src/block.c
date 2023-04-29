@@ -21,21 +21,34 @@
 Block *	block_allocate(size_t size) {
     // Allocate block
     intptr_t allocated = sizeof(Block) + ALIGN(size);
-    Block *  block     = sbrk(allocated);
-    if (block == SBRK_FAILURE) {
-        return NULL;
+
+    Block * block = free_list_search(allocated);
+
+    if (block)
+    {
+        block_detach(block);
+        // split
+        
+    }
+    else
+    {
+        block     = sbrk(allocated);
+        if (block == SBRK_FAILURE) {
+            return NULL;
+        }
+        block->capacity = ALIGN(size);
+        block->prev     = block;
+        block->next     = block;
     }
 
     // Record block information
-    block->capacity = ALIGN(size);
     block->size     = size;
-    block->prev     = block;
-    block->next     = block;
-
+    
     // Update counters
     Counters[HEAP_SIZE] += allocated;
     Counters[BLOCKS]++;
     Counters[GROWS]++;
+
     return block;
 }
 
