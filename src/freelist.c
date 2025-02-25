@@ -166,7 +166,7 @@ void  print_free_list()
 
     while (cur != &FreeList)
     {
-        printf("%p: %d ", cur + sizeof(Block), cur->capacity);
+        printf("%p: %ld ", cur + sizeof(Block), cur->capacity);
         cur = cur->next;
     }
     printf("\n");

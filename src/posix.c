@@ -65,7 +65,7 @@ void free(void *ptr) {
     Counters[FREES]++;
 
     // TODO: Try to release block, otherwise insert it into the free list
-    Block * block = (Block *)ptr - 1;
+    Block * block = BLOCK_FROM_POINTER(ptr);
     block->size = 0;
     free_list_insert(block);
     block_release(FreeList.prev);
@@ -86,7 +86,7 @@ void *calloc(size_t nmemb, size_t size) {
 
     if (ptr)
     {
-        Block * block = (Block *)ptr - 1;
+        Block * block = BLOCK_FROM_POINTER(ptr);
         memset(ptr, 0, block->capacity);
         Counters[CALLOCS]++;
 
@@ -111,7 +111,7 @@ void *realloc(void *ptr, size_t size) {
     }
     else
     {
-        Block *block = (Block *)ptr - 1;
+        Block *block = BLOCK_FROM_POINTER(ptr);
         void * new_ptr;
         if (block->capacity >= size)
         {

@@ -52,7 +52,7 @@ bool	block_release(Block *block) {
     size_t allocated = sizeof(Block) + block->capacity;
 
     // TODO: Implement block release
-    if ((char *)block + allocated == sbrk(0) && block->capacity + sizeof(Block) >= TRIM_THRESHOLD)
+    if ((char *)block + allocated == sbrk(0) && block->capacity > TRIM_THRESHOLD)
     {
         block_detach(block);
 
@@ -104,7 +104,7 @@ Block * block_detach(Block *block) {
  **/
 bool	block_merge(Block *dst, Block *src) {
     // TODO: Implement block merge
-    if ((char*)dst + dst->capacity + sizeof(Block) == src)
+    if ((char*)dst + dst->capacity + sizeof(Block) == (char *)src)
     {
         dst->next = src->next;
         src->next->prev = dst;
@@ -137,7 +137,7 @@ Block * block_split(Block *block, size_t size) {
     size = ALIGN(size);
     if (block->capacity - size > sizeof(Block))
     {
-        Block * new_block = (char *)block + sizeof(Block) + size;
+        Block * new_block = (Block *)((char *)block + sizeof(Block) + size);
         new_block->capacity = block->capacity - size - sizeof(Block);
         new_block->size = 0;
         block->capacity = size;

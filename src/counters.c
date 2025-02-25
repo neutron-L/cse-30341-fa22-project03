@@ -49,12 +49,11 @@ double  internal_fragmentation() {
         size_t internal_frag = 0;
         Block * cur = (Block *)((char *)heap_top - Counters[HEAP_SIZE]);
 
-        while (cur != heap_top)
+        while ((char *)cur != heap_top)
         {
-            internal_frag += ALIGN(cur->size) - cur->size;
+            internal_frag += cur->capacity - cur->size;
             cur = (Block *)((char *)cur + (cur->capacity + sizeof(Block)));
         } 
-
         return internal_frag * 100.0 / Counters[HEAP_SIZE];
     }
     return 0.0;
