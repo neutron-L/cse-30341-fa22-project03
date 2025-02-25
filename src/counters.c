@@ -48,13 +48,19 @@ double  internal_fragmentation() {
         char * heap_top = sbrk(0);
         size_t internal_frag = 0;
         Block * cur = (Block *)((char *)heap_top - Counters[HEAP_SIZE]);
+        Block *free_block = FreeList.next;
 
         while ((char *)cur != heap_top)
         {
-            internal_frag += cur->capacity - cur->size;
+            if (cur != free_block) 
+            {
+                internal_frag += cur->capacity - cur->size;
+            }
+            if (cur >= free_block)
+                free_block = free_block->next;
             cur = (Block *)((char *)cur + (cur->capacity + sizeof(Block)));
         } 
-        return internal_frag * 100.0 / Counters[HEAP_SIZE];
+        return internal_frag * (double)(100.0) / Counters[HEAP_SIZE];
     }
     return 0.0;
 }
